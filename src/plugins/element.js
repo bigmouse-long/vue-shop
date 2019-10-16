@@ -1,12 +1,58 @@
 import Vue from 'vue'
-import { Button } from 'element-ui'
-import { Form, FormItem } from 'element-ui'
-import { Input } from 'element-ui'
-import { Message } from 'element-ui'
+// import { Button } from 'element-ui'
+// import { Form, FormItem } from 'element-ui'
+// import { Input } from 'element-ui'
+// import { Message } from 'element-ui'
+// 将element-ui中按需导入的元素进行整合，让页面更加整洁
+import {
+    Message,
+    Input,
+    Form,
+    FormItem,
+    Button,
+    Container,
+    Header,
+    Aside,
+    Main,
+    Menu,
+    Submenu,
+    MenuItem,
+    Breadcrumb,
+    BreadcrumbItem,
+    Card,
+    Row,
+    Col,
+    Table,
+    TableColumn,
+    Switch,
+    Tooltip,
+    Pagination,
+    Dialog,
+    MessageBox
+} from 'element-ui'
 
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(FormItem)
 Vue.use(Input)
+Vue.use(Container)
+Vue.use(Header)
+Vue.use(Aside)
+Vue.use(Main)
+Vue.use(Menu)
+Vue.use(Submenu)
+Vue.use(MenuItem)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
+Vue.use(Card)
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Switch)
+Vue.use(Tooltip)
+Vue.use(Pagination)
+Vue.use(Dialog)
     //配置全局的信息提示 在调用时只需要写this.$message
 Vue.prototype.$message = Message
+Vue.prototype.$confirm = MessageBox.confirm

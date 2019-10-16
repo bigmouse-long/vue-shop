@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Login from './components/login.vue'
 import Home from './components/Home.vue'
-
+import Welcome from './components/Welcome.vue'
+import Users from './components/user/Users.vue'
 
 Vue.use(Router)
 
@@ -11,7 +12,18 @@ const router = new Router({
             //重定向到登录页面
             { path: '/', redirect: '/login' },
             { path: '/login', component: Login },
-            { path: '/home', component: Home }
+            {
+                path: '/home',
+                component: Home,
+                // 当访问home页面时，重定向到welcome
+                redirect: '/welcome',
+                children: [
+                    { path: '/welcome', component: Welcome, redirect: '/users' },
+                    // 用户列表组件
+                    { path: '/users', component: Users },
+
+                ]
+            }
         ]
     })
     //路由导航守卫，判断是否登录，如果没有登陆则没有访问其它页面权限
