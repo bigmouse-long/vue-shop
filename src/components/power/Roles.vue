@@ -65,8 +65,18 @@
         <el-table-column label="操作">
           <!-- scope.row有所有信息，里面的id可用于下面的三个功能参数的传递 -->
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              icon="el-icon-edit"
+              @click="editRole(scope.row.id)"
+            >编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              icon="el-icon-delete"
+              @click="deleteRole(scope.row.id)"
+            >删除</el-button>
             <el-button
               size="mini"
               type="warning"
@@ -94,6 +104,23 @@
         <el-button type="primary" @click="treeRights">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 修改角色对话框 -->
+    <el-dialog title="修改角色" :visible.sync="modifyUserVisible" width="50%">
+      <span>
+        <el-form :model="modifyForm" ref="modifyFormRef" label-width="70px">
+          <el-form-item label="角色名">
+            <el-input v-model="modifyForm.roleName"></el-input>
+          </el-form-item>
+          <el-form-item label="角色描述">
+            <el-input v-model="modifyForm.roleDesc"></el-input>
+          </el-form-item>
+        </el-form>
+      </span>
+      <span slot="footer">
+        <el-button @click="modifyUserVisible = false">取 消</el-button>
+        <el-button type="primary" @click="modifyRole(modifyForm.roleId)">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -111,7 +138,11 @@ export default {
       //   树形控件默认选中的数组id
       treeDef: [],
       // 当前要进行修改权限的id
-      roleId: ''
+      roleId: '',
+      // 要修改的用户
+      modifyForm: {},
+      // 控制修改用户框的显示
+      modifyUserVisible: false
     }
   },
   created() {
@@ -197,6 +228,55 @@ export default {
       this.roleList()
       this.$message.success('分配权限成功')
       // console.log(res);
+    },
+    // 删除角色
+    deleteRole(id) {
+      // console.log(id);
+      this.$confirm('此操作将永久删除该用户角色, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          const { data: res } = await this.$http.delete('roles/' + id)
+          if (res.meta.status !== 200)
+            return this.$message.error('删除角色失败')
+          this.roleList()
+          this.$message.success('删除角色成功')
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+    },
+    // 编辑角色
+    async editRole(id) {
+      // console.log(id);
+      // 查找角色信息
+      const { data: res } = await this.$http.get('roles/' + id)
+      // console.log(res);
+      if (res.meta.status !== 200) return this.$message.error('查找角色失败')
+      this.modifyForm = res.data
+      this.modifyUserVisible = true
+    },
+    // 点击修改角色确定按钮
+    async modifyRole(id) {
+      // 获取到要被修改角色的id
+      // console.log(id);
+      this.$refs.modifyFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.put(
+          'roles/' + id,
+          this.modifyForm
+        )
+        // console.log(res);
+        if (res.meta.status !== 200) return this.$message.error('编辑角色失败')
+        this.$message.success('编辑角色成功')
+        this.roleList()
+        this.modifyUserVisible = false
+      })
     }
   }
 }
