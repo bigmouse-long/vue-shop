@@ -1,3 +1,20 @@
+Skip to content
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@bigmouse-long 
+1
+00bigmouse-long/vue-shop
+ Code Issues 0 Pull requests 0 Projects 0 Wiki Security Insights Settings
+vue-shop/src/components/power/Roles.vue
+@bigmouse-long bigmouse-long 实现了角色列表里的编辑和删除功能
+a314c4f 20 hours ago
+298 lines (298 sloc)  9.63 KB
+  
 <template>
   <div>
     <!-- 面包屑导航 -->
@@ -11,7 +28,7 @@
       <!--添加用户按钮  -->
       <el-row>
         <el-col>
-          <el-button type="primary">添加用户</el-button>
+          <el-button type="primary" @click="addUserRole">添加用户</el-button>
         </el-col>
       </el-row>
       <!-- 数据展示区域 -->
@@ -65,8 +82,18 @@
         <el-table-column label="操作">
           <!-- scope.row有所有信息，里面的id可用于下面的三个功能参数的传递 -->
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              icon="el-icon-edit"
+              @click="editRole(scope.row.id)"
+            >编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              icon="el-icon-delete"
+              @click="deleteRole(scope.row.id)"
+            >删除</el-button>
             <el-button
               size="mini"
               type="warning"
@@ -94,6 +121,38 @@
         <el-button type="primary" @click="treeRights">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 修改角色对话框 -->
+    <el-dialog title="修改角色" :visible.sync="modifyUserVisible" width="50%">
+      <span>
+        <el-form :model="modifyForm" ref="modifyFormRef" label-width="70px">
+          <el-form-item label="角色名">
+            <el-input v-model="modifyForm.roleName"></el-input>
+          </el-form-item>
+          <el-form-item label="角色描述">
+            <el-input v-model="modifyForm.roleDesc"></el-input>
+          </el-form-item>
+        </el-form>
+      </span>
+      <span slot="footer">
+        <el-button @click="modifyUserVisible = false">取 消</el-button>
+        <el-button type="primary" @click="modifyRole(modifyForm.roleId)">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 添加角色 -->
+    <el-dialog title="修改角色" :visible.sync="addUserVisible" width="50%">
+      <el-form ref="addRoleFormRef" :model="addRoleform" label-width="80px">
+        <el-form-item label="角色名称">
+          <el-input v-model="addRoleform.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述">
+          <el-input v-model="addRoleform.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+        <el-button @click="addUserVisible = false">取 消</el-button>
+        <el-button type="primary" @click="userRoles">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -111,7 +170,15 @@ export default {
       //   树形控件默认选中的数组id
       treeDef: [],
       // 当前要进行修改权限的id
-      roleId: ''
+      roleId: '',
+      // 要修改的用户
+      modifyForm: {},
+      // 控制修改用户框的显示
+      modifyUserVisible: false,
+      // 添加用户框
+      addUserVisible: false,
+      // 添加用户表单
+      addRoleform: {}
     }
   },
   created() {
@@ -197,6 +264,68 @@ export default {
       this.roleList()
       this.$message.success('分配权限成功')
       // console.log(res);
+    },
+    // 删除角色
+    deleteRole(id) {
+      // console.log(id);
+      this.$confirm('此操作将永久删除该用户角色, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          const { data: res } = await this.$http.delete('roles/' + id)
+          if (res.meta.status !== 200)
+            return this.$message.error('删除角色失败')
+          this.roleList()
+          this.$message.success('删除角色成功')
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+    },
+    // 编辑角色
+    async editRole(id) {
+      // console.log(id);
+      // 查找角色信息
+      const { data: res } = await this.$http.get('roles/' + id)
+      // console.log(res);
+      if (res.meta.status !== 200) return this.$message.error('查找角色失败')
+      this.modifyForm = res.data
+      this.modifyUserVisible = true
+    },
+    // 点击修改角色确定按钮
+    async modifyRole(id) {
+      // 获取到要被修改角色的id
+      // console.log(id);
+      this.$refs.modifyFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.put(
+          'roles/' + id,
+          this.modifyForm
+        )
+        // console.log(res);
+        if (res.meta.status !== 200) return this.$message.error('编辑角色失败')
+        this.$message.success('编辑角色成功')
+        this.roleList()
+        this.modifyUserVisible = false
+      })
+    },
+    addUserRole() {
+      this.addUserVisible = true
+    },
+    // 添加用户角色确定按钮
+    async userRoles() {
+      // console.log(this.addRoleform);
+      const { data: res } = await this.$http.post('roles', this.addRoleform)
+      // console.log(res);
+      if (res.meta.status !== 201) return this.$message.error('添加角色失败')
+      this.roleList()
+      this.$message.success('添加角色失成功')
+      this.addUserVisible = false
     }
   }
 }
@@ -216,3 +345,4 @@ export default {
   align-items: center;
 }
 </style>
+

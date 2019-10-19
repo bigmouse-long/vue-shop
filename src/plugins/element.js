@@ -32,7 +32,8 @@ import {
     Tag,
     Tree,
     Select,
-    Option
+    Option,
+    Cascader
 } from 'element-ui'
 
 Vue.use(Button)
@@ -61,6 +62,7 @@ Vue.use(Tag)
 Vue.use(Tree)
 Vue.use(Select)
 Vue.use(Option)
+Vue.use(Cascader)
     //配置全局的信息提示 在调用时只需要写this.$message
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
