@@ -25,3 +25,11 @@ body,
     max-height: 100vh;
     overflow: scroll-y;
 }
+
+.el-steps {
+    margin: 20px 0;
+}
+
+.ql-editor {
+    min-height: 300px;
+}
